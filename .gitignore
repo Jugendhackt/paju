@@ -1,0 +1,21 @@
+# Logs
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencies
+node_modules/
+
+# ESLint
+.eslintcache
+
+# Secrets
+.env
+
+# Nuxt.js
+.nuxt
+
+# IDE
+.idea
+
+# Service worker
+sw.*
