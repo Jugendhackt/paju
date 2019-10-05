@@ -11,100 +11,90 @@ const userList = [{
   time: 0
 }];
 
-module.exports = context => {
-    const {
-      app,
-      spotifyApi
-    } = context;
+module.exports = ({
+  db,
+  app,
+  spotifyApi
+}) => {
+  const R = new Router();
 
-    const R = new Router();
+  R.use(bodyParser.json());
 
-    R.use(bodyParser.json());
-
-    R.get("/", async (req, res) => {
-      const playlist = await spotifyApi.getPlaylistTracks(process.env.PLAYLIST_ID, {
-        limit: 100,
-        fields: "items(track(name,id,artists(name)))"
-      });
-
-      res.send(playlist.body.items.map(({
-        track
-      }) => ({
-        title: track.name,
-        id: track.id,
-        artists: _.map(track.artists, "name")
-      })));
+  R.get("/", async (req, res) => {
+    const playlist = await spotifyApi.getPlaylistTracks(process.env.PLAYLIST_ID, {
+      limit: 100,
+      fields: "items(track(name,id,artists(name)))"
     });
 
-    let saved = [];
-    setTimeout(async () => {
-      saved = (await spotifyApi.getPlaylistTracks(process.env.PLAYLIST_ID, {
-        limit: 100,
-        fields: "items(track(id))"
-      })).body.items.map(({
-        track
-      }) => track.id);
-    }, 10000);
+    res.send(playlist.body.items.map(({
+      track
+    }) => ({
+      title: track.name,
+      id: track.id,
+      artists: _.map(track.artists, "name")
+    })));
+  });
 
-    R.get("/search", async (req, res) => {
-      const result = await spotifyApi.searchTracks(req.query.q, {
-        fields: "tracks(items(name,id,artists(name)))"
-      });
+  R.get("/delete", async (req, res) => {
+    try {
+      await spotifyApi.removeTracksFromPlaylistByPosition(
+        process.env.PLAYLIST_ID,
+        [req.query.index]
+      );
 
-      res.send(result.body.tracks.items.map(track => ({
-        title: track.name,
-        id: track.id,
-        artists: _.map(track.artists, "name"),
-        saved: saved.includes(track.id)
-      })));
+      res.status(204).send();
+      res.send("ok");
+    } catch (e) {
+      res.status(e.statusCode).send();
+      console.error(e);
+      res.send(e);
+    }
+  });
+
+  R.get("/search", async (req, res) => {
+    const result = await spotifyApi.searchTracks(req.query.q, {
+      fields: "tracks(items)"
     });
 
-    R.put("/", async (req, res) => {
-        try {
-          const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    res.send(result.body.tracks.items.map(track => ({
+      title: track.name,
+      id: track.id,
+      artists: _.map(track.artists, "name")
+    })));
+  });
 
-          const susUsers = userList.find(user => (user.ip === ip)) || 0;
-          if (susUsers) {
-            const timeGone = Date.now() - susUsers.time;
-            console.log(timeGone);
-            if (timeGone < cooldown) {
-              res.status(402).send({
-                error: "TIMEOUT"
-              });
-              return;
-            }
-          }
+  R.put("/", async (req, res) => {
+    try {
+      const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-          userList.push({
-            ip,
-            time: Date.now()
+      const susUsers = userList.find(user => (user.ip === ip)) || 0;
+      if (susUsers) {
+        const timeGone = Date.now() - susUsers.time;
+        console.log(timeGone);
+        if (timeGone < cooldown) {
+          res.status(402).send({
+            error: "TIMEOUT"
           });
-          console.log(userList);
+          return;
+        }
+      }
 
-          await spotifyApi.addTracksToPlaylist(
-            process.env.PLAYLIST_ID,
-            [`spotify:track:${req.body.id}`]
-          );
+      userList.push({
+        ip,
+        time: Date.now()
+      });
+      console.log(userList);
 
-          res.status(204).send();
-        } catch (e) {
-          console.error(e);
-          if (saved.includes(req.body.id)) {
-            res.status(402).send({
-              error: "ALREADY_INSIDE"
-            });
-            return;
-          }
+      await spotifyApi.addTracksToPlaylist(
+        process.env.PLAYLIST_ID,
+        [`spotify:track:${req.body.id}`]
+      );
 
-          saved.push(req.body.id);
+      res.status(204).send();
+    } catch (e) {
+      console.error(e);
+    }
+  });
 
-          await spotifyApi.addTracksToPlaylist(
-            process.env.PLAYLIST_ID,
-            [`spotify:track:${req.body.id}`]
-          );
-
-          res.status(204).send();
-        });
-
-      app.use("/playlist", R);
-    };
+  app.use("/playlist", R);
+};
