@@ -10,21 +10,20 @@
 </template>
 
 <style scoped lang="scss">
-
 </style>
 
 <script>
-  export default {
-    data: () => ({
-      headers: [
-        { text: "Title", value: "title" },
-        { text: "Artist", value: "artist" },
-        { text: "Added by", value: "addedBy" }
-      ],
-      items: []
-    }),
-    async asyncData({ $axios }) {
-      return {
+export default {
+  data: () => ({
+    headers: [
+      { text: "Title", value: "name" },
+      { text: "Artist", value: "artists" },
+      { text: "Added by", value: "addedBy" }
+    ],
+    items: []
+  }),
+  async asyncData({ $axios }) {
+    /*  return {
         items: [
           {
             id: "4Nip6oiJU24LqcUEi7u19S",
@@ -34,10 +33,11 @@
           }
         ]
       };
+      */
 
-      // return {
-      //   items: await $axios.$get("/playlist")
-      // };
-    }
-  };
+    return {
+      items: await $axios.$get("/tracklist")
+    };
+  }
+};
 </script>
