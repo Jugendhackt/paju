@@ -1,3 +1,4 @@
+const consola = require("consola");
 const mysql = require("mysql");
 
 module.exports = async () => {
@@ -13,7 +14,7 @@ module.exports = async () => {
         throw err;
     }
 
-    console.log("Connected!");
+    consola.success("MySQL Connected!");
   });
 
   return connection;
