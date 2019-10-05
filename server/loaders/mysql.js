@@ -4,6 +4,7 @@ module.exports = async () => {
   const connection = await mysql.createConnection({
     host: "cherob.eu",
     user: "paju",
+    database: "paju",
     password: "jrSjN2i7XkwTk2rT#E6q&Co7spdX"
   });
 
