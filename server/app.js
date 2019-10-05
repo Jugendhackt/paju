@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const consola = require("consola");
 const {

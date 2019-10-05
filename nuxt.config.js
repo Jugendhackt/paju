@@ -3,7 +3,7 @@ const colors = require("vuetify/es5/util/colors").default;
 module.exports = {
   mode: "spa",
   env: {
-    SPOTIFY_CLIENT_ID: "4650329e12bd42e1b9c4941699fb8feb"
+    SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID
   },
   /*
   ** Headers of the page
