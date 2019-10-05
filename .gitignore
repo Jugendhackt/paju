@@ -9,6 +9,9 @@ node_modules/
 .eslintcache
 .jshintrc
 
+# Babel
+.babelrc
+
 # Secrets
 .env
 
@@ -20,3 +23,5 @@ node_modules/
 
 # Service worker
 sw.*
+.eslintrc.js
+.eslintc
