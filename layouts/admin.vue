@@ -67,7 +67,12 @@
         {
           icon: "playlist_play",
           title: "Playlist",
-          to: "/playlist"
+          to: "/tracklist"
+        },
+        {
+          icon: "search",
+          title: "Search",
+          to: "/g/search"
         }
       ]
     }),

@@ -1,10 +1,16 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-negated-condition */
 const bodyParser = require("body-parser");
-const { Router } = require("express");
+const {
+  Router
+} = require("express");
 const _ = require("lodash");
 
-module.exports = ({ db, app, spotifyApi }) => {
+module.exports = ({
+  db,
+  app,
+  spotifyApi
+}) => {
   const R = new Router();
 
   R.use(bodyParser.json());
@@ -15,11 +21,26 @@ module.exports = ({ db, app, spotifyApi }) => {
       fields: "items(track(name,id,artists(name)))"
     });
 
-    res.send(playlist.body.items.map(({ track }) => ({
+    res.send(playlist.body.items.map(({
+      track
+    }) => ({
       title: track.name,
       id: track.id,
       artists: _.map(track.artists, "name")
     })));
+  });
+
+  R.delete("/", async (req, res) => {
+    try {
+      await spotifyApi.removeTracksFromPlaylistByPosition(
+        process.env.PLAYLIST_ID,
+        [req.body.index]
+      );
+
+      res.status(204).send();
+    } catch (e) {
+      console.error(e);
+    }
   });
 
   R.get("/search", async (req, res) => {
