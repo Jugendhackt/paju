@@ -9,7 +9,7 @@ module.exports = async () => {
     password: process.env.MYSQL_PASSWORD
   });
 
-  connection.connect(err => { 
+  connection.connect(err => {
     if (err) {
         throw err;
     }

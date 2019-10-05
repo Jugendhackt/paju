@@ -1,8 +1,8 @@
 const consola = require("consola");
 
 // *** Debug
-// import Service
-const PlaylistService = require("../services/playlist.js");
+// const QRCode = require("qrcode");
+// const PlaylistService = require("../services/playlist.js");
 // ***
 
 // import Loaders
@@ -12,22 +12,36 @@ const nuxtLoader = require("./nuxt");
 
 module.exports = {
   sqlConnection: undefined,
-  spotifyAPI: undefined,
+  spotifyApi: undefined,
   async init({
     expressApp
   }) {
     this.sqlConnection = await mysqlLoader();
     consola.success("MySqlDB initialized");
 
-    this.spotifyAPI = await spotifyLoader(this.sqlConnection, expressApp);
+    this.spotifyApi = await spotifyLoader(this.sqlConnection, expressApp);
     consola.success("Spotify Authorization initialized");
 
     await nuxtLoader(expressApp);
     consola.success("Nuxt initialized");
 
+    await nuxtLoader(expressApp);
+    consola.success("Nuxt Initialized");
+
     // *** Debug
-    const playlist = new PlaylistService(this.spotifyAPI);
-    consola.debug("ok", await playlist.searchTracks("Take on me").catch(e => { consola.error(e); }));
+    /*
+    QRCode.toString("www.google.de", { type: "terminal" }, (_err, url) => {
+      console.log(url);
+    });
+    */
+
+    /*
+    const playlist = new PlaylistService(this.spotifyApi, this.sqlConnection);
+    const tracks = await playlist.searchTracks("Take on me").catch(e => { console.error(e); });
+    tracks.forEach(track => {
+      playlist.addSong(track.uri);
+    });
+    */
     // ***
   }
 };
