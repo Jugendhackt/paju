@@ -1,4 +1,5 @@
 const querystring = require("querystring");
+const consola = require("consola");
 const SpotifyWebApi = require("spotify-web-api-node");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -51,7 +52,7 @@ module.exports = (sqlConnection, app) => {
     const storedState = req.cookies ? req.cookies[STATE_COOKIE_NAME] : null;
 
     if (state === null || state !== storedState) {
-      console.error("auth: STATE_MISMATCH");
+      consola.error("auth: STATE_MISMATCH");
       res.redirect("/?failed=1");
     } else {
       res.clearCookie(STATE_COOKIE_NAME);
