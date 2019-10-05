@@ -1,20 +1,32 @@
+const consola = require("consola");
+
+// *** Debug
+//  inport Service
+const PlaylistService = require("../services/playlist.js");
+// ***
+
+// import Loaders
 const mysqlLoader = require("./mysql");
 const spotifyLoader = require("./spotify");
 const nuxtLoader = require("./nuxt");
 
-module.exports = async function({
-  expressApp
-}) {
-  await nuxtLoader(expressApp);
+module.exports = {
+  sqlConnection: undefined,
+  spotfyApi: undefined,
+  async init({
+    expressApp
+  }) {
+    await nuxtLoader(expressApp);
 
-  const sqlConnection = await mysqlLoader();
-  console.log("MySqlDB Intialized");
+    this.sqlConnection = await mysqlLoader();
+    consola.success("MySqlDB Intialized");
 
-  const spotfyApi = await spotifyLoader(sqlConnection, expressApp);
-  console.log("Spotify API Intialized");
+    this.spotfyApi = await spotifyLoader(this.sqlConnection, expressApp);
+    consola.success("Spotify API Intialized");
 
-  // await expressLoader({ app: expressApp });
-  // console.log('Express Intialized');
-
-  // ... more loaders can be here
+    // *** Debug
+    const playlist = new PlaylistService(this.spotfyApi);
+    console.debug(playlist.searchTrack("Take on me"));
+    // ***
+  }
 };
