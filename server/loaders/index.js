@@ -1,7 +1,7 @@
 const mysqlLoader = require("./mysql");
 const spotifyLoader = require("./spotify");
 
-module.exports = async function ({
+module.exports = async function({
   expressApp
 }) {
   const sqlConnection = await mysqlLoader();
@@ -16,7 +16,7 @@ module.exports = async function ({
     console.debug(`Result: ${JSON.stringify(result)}`);
   });
 
-  const spotfyApi = await spotifyLoader(sqlConnection);
+  const spotfyApi = await spotifyLoader(sqlConnection, expressApp);
   console.log("Spotify API Intialized");
 
   // await expressLoader({ app: expressApp });
