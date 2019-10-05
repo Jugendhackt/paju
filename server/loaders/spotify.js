@@ -9,6 +9,7 @@ const { Router } = require("express");
 
 const REDIRECT_URI = "http://localhost:3000/auth/callback";
 const STATE_COOKIE_NAME = "spotify_auth_state";
+const SCOPE = "user-read-private user-read-email";
 
 const clientID = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -19,6 +20,18 @@ module.exports = (sqlConnection, app) => {
     client_secret: clientSecret,
     redirect_uri: REDIRECT_URI
   });
+
+  (() => {
+    const sql = "SELECT * FROM `variables` WHERE `name` = 'access_token'"
+
+    sqlConnection.query(sql, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        spotifyApi.setAccessToken(result[0].value);
+      }
+    })
+  })();
 
   const R = new Router();
 
@@ -35,12 +48,11 @@ module.exports = (sqlConnection, app) => {
       sameSite: "strict"
     });
 
-    const scope = "user-read-private user-read-email";
     res.redirect(`https://accounts.spotify.com/authorize?${
       querystring.stringify({
         response_type: "code",
         client_id: clientID,
-        scope,
+        scope: SCOPE,
         redirect_uri: REDIRECT_URI,
         state
       })}`);
@@ -75,22 +87,26 @@ module.exports = (sqlConnection, app) => {
           const { access_token: accessToken } = body;
 
           const sql =
-            `UPDATE 'variables' SET 'value' = '${accessToken}' WHERE 'variables'.'name' = 'access_token'`;
+            `UPDATE \`variables\` SET \`value\` = '${accessToken}' WHERE \`variables\`.\`name\` = 'access_token'`;
 
           sqlConnection.query(sql, err => {
             if (err) {
               throw err;
             }
           });
-        } else {
+
+          spotifyApi.setAccessToken(accessToken);
+
           res.redirect("/dashboard");
+        } else {
+          res.redirect("/?failed=1");
         }
       });
     }
   });
 
   R.get("/isAuthenticated", (req, res) => {
-    const sql = "SELECT * FROM 'variables' WHERE 'variables'.'name' = 'access_token'";
+    const sql = "SELECT * FROM `variables` WHERE `variables`.`name` = `access_token`";
 
     sqlConnection.query(sql, (err, result) => {
       if (err) {

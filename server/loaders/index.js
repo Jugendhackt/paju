@@ -1,7 +1,7 @@
 const consola = require("consola");
 
 // *** Debug
-//  inport Service
+// import Service
 const PlaylistService = require("../services/playlist.js");
 // ***
 
@@ -16,14 +16,14 @@ module.exports = {
   async init({
     expressApp
   }) {
-    await nuxtLoader(expressApp);
-    consola.success("Nuxt Initialized");
-
     this.sqlConnection = await mysqlLoader();
-    consola.success("MySqlDB Initialized");
+    consola.success("MySqlDB initialized");
 
     this.spotifyAPI = await spotifyLoader(this.sqlConnection, expressApp);
-    consola.success("Spotify API Initialized");
+    consola.success("Spotify Authorization initialized");
+
+    await nuxtLoader(expressApp);
+    consola.success("Nuxt initialized");
 
     // *** Debug
     const playlist = new PlaylistService(this.spotifyAPI);
