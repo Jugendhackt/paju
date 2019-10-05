@@ -59,9 +59,7 @@ export default {
   methods: {
     remove(id) {
       const index = this.tracks.findIndex(track => track.id === id);
-      this.$axios.$delete("/playlist", {
-        index
-      });
+      this.$axios.$get("/playlist/delete?index="+index);
     }
   }
 };

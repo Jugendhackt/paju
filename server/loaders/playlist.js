@@ -30,16 +30,19 @@ module.exports = ({
     })));
   });
 
-  R.delete("/", async (req, res) => {
+  R.get("/delete", async (req, res) => {
     try {
       await spotifyApi.removeTracksFromPlaylistByPosition(
         process.env.PLAYLIST_ID,
-        [req.body.index]
+        [req.query.index]
       );
-
+      
       res.status(204).send();
+      res.send("ok");
     } catch (e) {
+      res.status(e.statusCode).send();
       console.error(e);
+      res.send(e);
     }
   });
 
