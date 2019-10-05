@@ -49,7 +49,7 @@ module.exports = (spotifyApi, sqlConnection, app) => {
 
         // console.log(track);
       });
-      console.log( await )
+      console.log(await Promise.all(tracks));
       res.send(await Promise.all(tracks));
     });
   });
