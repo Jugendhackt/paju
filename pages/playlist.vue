@@ -23,18 +23,6 @@ export default {
     items: []
   }),
   async asyncData({ $axios }) {
-    /*  return {
-        items: [
-          {
-            id: "4Nip6oiJU24LqcUEi7u19S",
-            title: "Standard (feat. Trettmann, Gringo, Ufo361 & Gzuz)",
-            artist: "Kitschkrieg, Trettmann, Gzuz, Gringo, Ufo361",
-            addedBy: "Moritz"
-          }
-        ]
-      };
-      */
-
     return {
       items: await $axios.$get("/tracklist")
     };
