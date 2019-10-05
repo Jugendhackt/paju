@@ -5,6 +5,11 @@ const {
   Router
 } = require("express");
 const _ = require("lodash");
+const cooldown = 50000;
+const userList = [{
+  id: "0.0.0.0",
+  time: 0
+}];
 
 module.exports = ({
   db,
@@ -36,7 +41,7 @@ module.exports = ({
         process.env.PLAYLIST_ID,
         [req.query.index]
       );
-      
+
       res.status(204).send();
       res.send("ok");
     } catch (e) {
@@ -60,6 +65,26 @@ module.exports = ({
 
   R.put("/", async (req, res) => {
     try {
+      const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+      const susUsers = userList.find(user => (user.ip === ip)) || 0;
+      if (susUsers) {
+        const timeGone = Date.now() - susUsers.time;
+        console.log(timeGone);
+        if (timeGone < cooldown) {
+          res.status(402).send({
+            error: "TIMEOUT"
+          });
+          return;
+        }
+      }
+
+      userList.push({
+        ip,
+        time: Date.now()
+      });
+      console.log(userList);
+
       await spotifyApi.addTracksToPlaylist(
         process.env.PLAYLIST_ID,
         [`spotify:track:${req.body.id}`]
