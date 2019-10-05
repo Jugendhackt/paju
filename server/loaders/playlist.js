@@ -67,30 +67,30 @@ module.exports = ({
     try {
       const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-      const susUsers = userList.find(user => (user.ip === ip)) || 0;
-      if (susUsers) {
-        const timeGone = Date.now() - susUsers.time;
-        console.log(timeGone);
-        if (timeGone < cooldown) {
-          res.status(402).send({
-            error: "TIMEOUT"
-          });
-          return;
+        const susUsers = userList.find(user => (user.ip === ip)) || 0;
+        if (susUsers) {
+          const timeGone = Date.now() - susUsers.time;
+          console.log(timeGone);
+          if (timeGone < cooldown) {
+            res.status(402).send({
+              error: "TIMEOUT"
+            });
+            return;
+          }
         }
-      }
 
-      userList.push({
-        ip,
-        time: Date.now()
-      });
-      console.log(userList);
+        userList.push({
+          ip,
+          time: Date.now()
+        });
+        console.log(userList);
 
-      await spotifyApi.addTracksToPlaylist(
-        process.env.PLAYLIST_ID,
-        [`spotify:track:${req.body.id}`]
-      );
+        await spotifyApi.addTracksToPlaylist(
+          process.env.PLAYLIST_ID,
+          [`spotify:track:${req.body.id}`]
+        );
 
-      res.status(204).send();
+        res.status(204).send();
     } catch (e) {
       console.error(e);
     }
