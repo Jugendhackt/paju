@@ -9,7 +9,14 @@ const { Router } = require("express");
 
 const REDIRECT_URI = "http://localhost:3000/auth/callback";
 const STATE_COOKIE_NAME = "spotify_auth_state";
-const SCOPE = "user-read-private user-read-email";
+const SCOPE = [
+  "streaming",
+  "user-modify-playback-state",
+  "user-read-currently-playing",
+  "user-read-playback-state",
+  "user-read-email",
+  "user-read-private"
+].join(" ");
 
 const clientID = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -22,7 +29,7 @@ module.exports = (sqlConnection, app) => {
   });
 
   (() => {
-    const sql = "SELECT * FROM `variables` WHERE `name` = 'access_token'"
+    const sql = "SELECT * FROM `variables` WHERE `name` = 'access_token'";
 
     sqlConnection.query(sql, (err, result) => {
       if (err) {
@@ -30,7 +37,7 @@ module.exports = (sqlConnection, app) => {
       } else {
         spotifyApi.setAccessToken(result[0].value);
       }
-    })
+    });
   })();
 
   const R = new Router();
@@ -105,8 +112,8 @@ module.exports = (sqlConnection, app) => {
     }
   });
 
-  R.get("/isAuthenticated", (req, res) => {
-    const sql = "SELECT * FROM `variables` WHERE `variables`.`name` = `access_token`";
+  R.get("/token", (req, res) => {
+    const sql = "SELECT * FROM `variables` WHERE `variables`.`name` = 'access_token'";
 
     sqlConnection.query(sql, (err, result) => {
       if (err) {
@@ -114,7 +121,7 @@ module.exports = (sqlConnection, app) => {
       }
 
       res.send({
-        value: result[0] !== undefined
+        token: result[0] ? result[0].value : null
       });
     });
   });

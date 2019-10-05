@@ -14,15 +14,15 @@
       </div>
       <v-card>
         <v-card-title class="headline">
-          {{ failed ? "An error occurred" : "Login" }}
+          Almost done...
         </v-card-title>
         <v-card-text>
-          {{ failed ? "Please try again." : "Please login to use Paju." }}
+          To start playing music, please open the Spotify player on one of your devices.
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
-          <v-btn href="/auth/redirect" color="primary">
-            Login with Spotify
+          <v-btn href="https://open.spotify.com" target="_blank" color="primary">
+            Open the Player
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -30,18 +30,13 @@
   </v-layout>
 </template>
 
+<style scoped lang="scss">
+
+</style>
+
 <script>
   export default {
-    layout: "emptyApp",
-    computed: {
-      failed() {
-        return this.$route.query.failed === "1";
-      }
-    },
-    async created() {
-      if (!(await this.$axios.$get("/auth/token"))) {
-        this.$router.push("/dashboard");
-      }
-    }
+    layout: "admin",
+    middleware: ["auth"]
   };
 </script>
