@@ -2,13 +2,9 @@ module.exports = class PlaylistService {
   constructor(spotifyApi) {
     this.api = spotifyApi;
   }
-  searchTrack(songName) {
+  async searchTracks(songName) {
     // Search tracks whose name, album or artist contains 'Love'
-    this.api.searchTracks(songName)
-      .then(data => {
-        console.log("Search by \"Love\"", data.body);
-      }, err => {
-        console.error(err);
-      });
+    const data = await this.api.searchTracks(songName);
+    return data;
   }
 };

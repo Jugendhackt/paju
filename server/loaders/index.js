@@ -26,7 +26,7 @@ module.exports = {
 
     // *** Debug
     const playlist = new PlaylistService(this.spotfyApi);
-    console.debug(playlist.searchTrack("Take on me"));
+    console.debug(playlist.searchTracks("Take on me"));
     // ***
   }
 };
