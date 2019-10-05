@@ -5,7 +5,7 @@ const config = require("../../nuxt.config.js");
 
 config.dev = process.env.NODE_ENV !== "production";
 
-module.exports = async app => {
+module.exports = async ({ app }) => {
   // Init Nuxt.js
   const nuxt = new Nuxt(config);
 
@@ -19,5 +19,4 @@ module.exports = async app => {
 
   // Give nuxt middleware to express
   app.use(nuxt.render);
-  return nuxt;
 };

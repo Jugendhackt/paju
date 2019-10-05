@@ -6,7 +6,7 @@ const {
   Router
 } = require("express");
 
-module.exports = (spotifyApi, sqlConnection, app) => {
+module.exports = ({ db, app, spotifyApi }) => {
   const R = new Router();
 
   R.use(bodyParser.json());
@@ -36,11 +36,11 @@ module.exports = (spotifyApi, sqlConnection, app) => {
 
   R.get("/", async (req, res) => {
     const sql = "SELECT * FROM `playlist` ";
-    await sqlConnection.query(sql, async (err, resSql) => {
+    await db.query(sql, async (err, resSql) => {
       if (err) {
         throw err;
       }
-      
+
       for (let i = 0; i < resSql.length; i += 1) {
         const track = {
           name: "",
@@ -57,7 +57,7 @@ module.exports = (spotifyApi, sqlConnection, app) => {
         trackInfo.body.artists.forEach(artist => {
           track.artists += `${artist.name} `;
         });
-        sqlConnection.query(`SELECT * FROM \`users\` WHERE \`adress\` = '${resSql[i].user_ip}'`, (err, resSec) => {
+        db.query(`SELECT * FROM \`users\` WHERE \`adress\` = '${resSql[i].user_ip}'`, (err, resSec) => {
           if (err) {
             console.error(err);
           }
@@ -75,7 +75,7 @@ module.exports = (spotifyApi, sqlConnection, app) => {
     const userIp = req.query.ip || "0.0.0.0";
 
     const sql = `DELETE FROM \`playlist\` WHERE \`playlist\`.\`spotify_id\` = ${spotifyId}`;
-    await sqlConnection.query(sql, (err, resSql) => {
+    await db.query(sql, (err, resSql) => {
       if (err) {
         throw err;
       }
@@ -89,14 +89,14 @@ module.exports = (spotifyApi, sqlConnection, app) => {
     const userIp = req.query.ip || "0.0.0.0";
 
     const sqlFind = `SELECT * FROM \`playlist\` WHERE \`spotify_id\` = '${spotifyId}'`;
-    await sqlConnection.query(sqlFind, (err, resFind) => {
+    await db.query(sqlFind, (err, resFind) => {
       if (err) {
         throw err;
       }
 
       if (!res.length) {
         const sqlAdd = `INSERT INTO \`playlist\` (\`id\`, \`spotify_id\`, \`user_ip\`, \`date_added\`) VALUES (NULL, '${spotifyId}', '${userIp}', CURRENT_TIMESTAMP);`;
-        sqlConnection.query(sqlAdd, (err, resAdd) => {
+        db.query(sqlAdd, (err, resAdd) => {
           if (err) {
             throw err;
           }

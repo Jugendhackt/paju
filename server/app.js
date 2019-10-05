@@ -12,9 +12,7 @@ const host = process.env.HOST || "localhost";
 async function start() {
   const app = express();
 
-  await loaders.init({
-    expressApp: app
-  });
+  await loaders.init(app);
 
   // Listen the server
   app.listen(port, host);
