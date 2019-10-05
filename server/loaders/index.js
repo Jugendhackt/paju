@@ -13,7 +13,7 @@ const nuxtLoader = require("./nuxt");
 
 const context = {
   db: null,
-  spotifyAPI: null,
+  spotifyApi: null,
   spotifyAccessToken: null,
   app: null
 };
