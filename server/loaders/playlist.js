@@ -6,14 +6,20 @@ const {
   Router
 } = require("express");
 
-module.exports = ({ db, app, spotifyApi }) => {
+module.exports = ({
+  db,
+  app,
+  spotifyApi
+}) => {
   const R = new Router();
 
   R.use(bodyParser.json());
 
   R.get("/track", async (req, res) => {
     const spotifyId = req.query.id || null;
-    const output = await spotifyApi.getTrack(spotifyId);
+    const output = await spotifyApi.getTrack(spotifyId).catch(err => {
+      consola.error(err);
+    });
 
     res.send(output.body);
   });
@@ -22,9 +28,10 @@ module.exports = ({ db, app, spotifyApi }) => {
     const name = req.body.name || null;
     const amount = req.body.amount || 10;
 
-    const output = await spotifyApi.searchTracks(name);
+    const output = await spotifyApi.searchTracks(name)
+
     const tracks = output.body.tracks.items.slice(0, amount);
-    let tracksNew = tracks.map(track => {
+    const tracksNew = tracks.map(track => {
       track.artist = "";
       track.artists.forEach(artist => {
         track.artist += `${artist.name} `;
@@ -50,7 +57,7 @@ module.exports = ({ db, app, spotifyApi }) => {
         const id = resSql[i].spotify_id.substring(14);
 
         const trackInfo = await spotifyApi.getTrack(id).catch(err => {
-          console.error(err);
+          consola.error(err);
         });
 
         track.name = trackInfo.body.name;
@@ -59,7 +66,7 @@ module.exports = ({ db, app, spotifyApi }) => {
         });
         db.query(`SELECT * FROM \`users\` WHERE \`adress\` = '${resSql[i].user_ip}'`, (err, resSec) => {
           if (err) {
-            console.error(err);
+            consola.error(err);
           }
           track.addedBy = resSec[0].username;
         });

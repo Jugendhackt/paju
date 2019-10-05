@@ -131,4 +131,5 @@ module.exports = context => {
   });
 
   app.use("/auth", R);
+  context.spotifyApi = spotifyApi;
 };
