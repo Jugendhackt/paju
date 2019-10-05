@@ -78,7 +78,7 @@ module.exports = {
       }
     },
     icons: {
-      iconfont: "mdi"
+      iconfont: "md"
     }
   },
   /*
