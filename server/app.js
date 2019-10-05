@@ -6,8 +6,8 @@ const consola = require("consola");
 // Import loaders
 const loaders = require("./loaders/index.js");
 
-const port = process.env.PORT | 3000;
-const host = process.env.HOST | "localhost";
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || "localhost";
 
 async function start() {
   const app = express();

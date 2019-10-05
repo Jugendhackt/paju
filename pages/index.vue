@@ -14,14 +14,14 @@
       </div>
       <v-card>
         <v-card-title class="headline">
-          Login
+          {{ failed ? "An error occurred" : "Login" }}
         </v-card-title>
         <v-card-text>
-          Please login to use Paju.
+          {{ failed ? "Please try again." : "Please login to use Paju." }}
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
-          <v-btn :href="authorizeURL" color="primary">
+          <v-btn href="/auth/redirect" color="primary">
             Login with Spotify
           </v-btn>
         </v-card-actions>
@@ -33,8 +33,8 @@
 <script>
   export default {
     computed: {
-      authorizeURL() {
-        return "https://accounts.spotify.com/authorize?";
+      failed() {
+        return this.$route.query.failed === "1";
       }
     }
   };

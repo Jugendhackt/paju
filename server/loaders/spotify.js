@@ -1,169 +1,107 @@
-/* eslint-disable camelcase */
 const querystring = require("querystring");
 const SpotifyWebApi = require("spotify-web-api-node");
-const express = require("express"); // Express web server framework
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const nanoid = require("nanoid");
 const request = require("request"); // "Request" library
+const { Router } = require("express");
 
-const client_id = process.env.SPOTIFY_CLIENT_ID; // Your client id
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET; // Your secret
-const redirect_uri = "http://localhost:8888/callback/"; // Your redirect uri
+const REDIRECT_URI = "http://localhost:3000/auth/callback";
+const STATE_COOKIE_NAME = "spotify_auth_state";
 
-const stateKey = "spotify_auth_state";
-
-/**
- * Generates a random string containing numbers and letters
- * @param  {number} length The length of the string
- * @return {string} The generated string
- */
-const generateRandomString = function(length) {
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let text = "";
-
-  for (let i = 0; i < length; i += 1) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-};
+const clientID = process.env.SPOTIFY_CLIENT_ID;
+const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
 module.exports = (sqlConnection, app) => {
   const spotifyApi = new SpotifyWebApi({
-    client_id,
-    client_secret,
-    redirect_uri
+    client_id: clientID,
+    client_secret: clientSecret,
+    redirect_uri: REDIRECT_URI
   });
 
-  app.use(express.static(`${__dirname}/public`))
-    .use(cors())
-    .use(cookieParser());
+  const R = new Router();
 
-  app.get("/", req => {
-    if (req.query.access_token) {
-      console.log(req.query.access_token);
+  R.use(cors());
+  R.use(cookieParser());
 
-      const sql = `UPDATE \`variables\` SET \`key\` = '${req.query.access_token}' WHERE \`variables\`.\`name\` = \`access_token\`;`;
+  R.get("/redirect", (req, res) => {
+    const state = nanoid(16);
 
-      sqlConnection.query(sql, (err, result) => {
-        if (err) {
-          throw err;
-        }
-        console.debug(`Result: ${JSON.stringify(result)}`);
-      });
-    }
-  });
+    res.cookie(STATE_COOKIE_NAME, state, {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 5 * 60 * 1000, // 5 minutes
+      sameSite: "strict"
+    });
 
-  app.get("/login", (_req, res) => {
-    const state = generateRandomString(16);
-    res.cookie(stateKey, state);
-
-    // your application requests authorization
     const scope = "user-read-private user-read-email";
     res.redirect(`https://accounts.spotify.com/authorize?${
       querystring.stringify({
         response_type: "code",
-        client_id,
+        client_id: clientID,
         scope,
-        redirect_uri,
+        redirect_uri: REDIRECT_URI,
         state
       })}`);
   });
 
-  app.get("/callback", (req, res) => {
-    // your application requests refresh and access tokens
-    // after checking the state parameter
-
+  R.get("/callback", (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state || null;
-    const storedState = req.cookies ? req.cookies[stateKey] : null;
+    const storedState = req.cookies ? req.cookies[STATE_COOKIE_NAME] : null;
 
     if (state === null || state !== storedState) {
-      res.redirect(`/#${
-        querystring.stringify({
-          error: "state_mismatch"
-        })}`);
+      console.error("auth: STATE_MISMATCH");
+      res.redirect("/?failed=1");
     } else {
-      res.clearCookie(stateKey);
+      res.clearCookie(STATE_COOKIE_NAME);
+
       const authOptions = {
         url: "https://accounts.spotify.com/api/token",
         form: {
           code,
-          redirect_uri,
+          redirect_uri: REDIRECT_URI,
           grant_type: "authorization_code"
         },
         headers: {
-          Authorization: `Basic ${Buffer.from(`${client_id}:${client_secret}`).toString("base64")}`
+          Authorization: `Basic ${Buffer.from(`${clientID}:${clientSecret}`).toString("base64")}`
         },
         json: true
       };
 
       request.post(authOptions, (error, response, body) => {
         if (!error && response.statusCode === 200) {
-          const access_token = body.access_token;
-            const refresh_token = body.refresh_token;
+          const { access_token: accessToken } = body;
 
-          const options = {
-            url: "https://api.spotify.com/v1/me",
-            headers: {
-              Authorization: `Bearer ${access_token}`
-            },
-            json: true
-          };
+          const sql =
+            `UPDATE 'variables' SET 'value' = '${accessToken}' WHERE 'variables'.'name' = 'access_token'`;
 
-          // use the access token to access the Spotify Web API
-          request.get(options, (_error, _response, body) => {
-            console.log(body);
+          sqlConnection.query(sql, err => {
+            if (err) {
+              throw err;
+            }
           });
-
-          // we can also pass the token to the browser to make requests from there
-          res.redirect(`/#${
-            querystring.stringify({
-              access_token,
-              refresh_token
-            })}`);
         } else {
-          res.redirect(`/#${
-            querystring.stringify({
-              error: "invalid_token"
-            })}`);
+          res.redirect("/dashboard");
         }
       });
     }
   });
 
-  app.get("/refresh_token", (req, res) => {
-    // requesting access token from refresh token
-    const refresh_token = req.query.refresh_token;
-    const authOptions = {
-      url: "https://accounts.spotify.com/api/token",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${client_id}:${client_secret}`).toString("base64")}`
-      },
-      form: {
-        grant_type: "refresh_token",
-        refresh_token
-      },
-      json: true
-    };
+  R.get("/isAuthenticated", (req, res) => {
+    const sql = "SELECT * FROM 'variables' WHERE 'variables'.'name' = 'access_token'";
 
-    request.post(authOptions, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const access_token = body.access_token;
-        res.send({
-          access_token
-        });
+    sqlConnection.query(sql, (err, result) => {
+      if (err) {
+        throw err;
       }
+
+      res.send({
+        value: result[0] !== undefined
+      });
     });
   });
 
-  const sql = "SELECT * FROM `variables` WHERE `name` = 'access_token'";
-  sqlConnection.query(sql, (err, result) => {
-    if (err) {
-      throw err;
-    }
-    console.log(`Load Access Token: ${JSON.stringify(result[0].key)}`);
-    spotifyApi.setAccessToken(result[0].key);
-  });
-
+  app.use("/auth", R);
   return spotifyApi;
 };
