@@ -1,13 +1,19 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
-      <input type="text" v-model="search" placeholder="edit me" />
+      <v-text-field
+        v-model="search"
+        type="search"
+        autocomplete="off"
+        label="Search"
+        outlined
+      ></v-text-field>
       <v-data-table
         disable-sort
         fixed-header
         :headers="headers"
-        :items="songs"
-        :items-per-page="5"
+        :items="tracks"
+        :items-per-page="20"
         class="elevation-1"
       ></v-data-table>
     </v-flex>
@@ -15,33 +21,28 @@
 </template>
 
 <style scoped lang="scss">
-.first-song {
-  margin-bottom: 20px;
-}
 
-.song--icon-wrapper:first-child {
-  margin-right: 10px;
-  margin-bottom: 0;
-}
 </style>
 
 <script>
-export default {
-  data: () => ({
-    headers: [
-      { text: "Title", value: "name" },
-      { text: "Artist", value: "artist" }
-    ],
-    songs: [],
-    search: ""
-  }),
-  async asyncData({ $axios }) {
-    return {
-      songs: await $axios.$post("/tracklist/searchTracks", {
-        name: "Take on Me",
-        amount: 3
+  import debounce from "lodash.debounce";
+
+  export default {
+    data: () => ({
+      headers: [
+        { text: "Title", value: "title" },
+        { text: "Artist", value: "artist" }
+      ],
+      tracks: [],
+      search: ""
+    }),
+    watch: {
+      search: debounce(async function() {
+        this.tracks = (await this.$axios.$get(`/playlist/search?q=${encodeURIComponent(this.search)}`)).map(track => ({
+          ...track,
+          artist: track.artists.join(" ")
+        }), 1000);
       })
-    };
-  }
-};
+    }
+  };
 </script>

@@ -30,6 +30,8 @@ module.exports = context => {
     redirect_uri: REDIRECT_URI
   });
 
+  context.spotifyApi = spotifyApi;
+
   (() => {
     const sql = "SELECT * FROM `variables` WHERE `name` = 'access_token'";
 

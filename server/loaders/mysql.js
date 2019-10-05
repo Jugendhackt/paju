@@ -11,7 +11,7 @@ module.exports = async context => {
 
   db.connect(err => {
     if (err) {
-        throw err;
+      throw err;
     }
 
     consola.success("MySQL connected!");
