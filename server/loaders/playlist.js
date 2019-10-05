@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-negated-condition */
+const bodyParser = require("body-parser");
 const consola = require("consola");
 const {
   Router
@@ -7,6 +8,8 @@ const {
 
 module.exports = (spotifyApi, sqlConnection, app) => {
   const R = new Router();
+
+  R.use(bodyParser.json());
 
   R.get("/track", async (req, res) => {
     const spotifyId = req.query.id || null;
@@ -16,11 +19,19 @@ module.exports = (spotifyApi, sqlConnection, app) => {
   });
 
   R.post("/searchTracks", async (req, res) => {
-    const name = req.query.name || null;
-    const amouth = req.query.amouth || 10;
+    const name = req.body.name || null;
+    const amount = req.body.amount || 10;
 
     const output = await spotifyApi.searchTracks(name);
-    res.send(output.body.tracks.items.slice(0, amouth));
+    const tracks = output.body.tracks.items.slice(0, amount);
+    let tracksNew = tracks.map(track => {
+      track.artist = "";
+      track.artists.forEach(artist => {
+        track.artist += `${artist.name} `;
+      });
+      return track;
+    });
+    res.send(tracksNew);
   });
 
   R.get("/", async (req, res) => {
