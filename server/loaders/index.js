@@ -12,7 +12,7 @@ const nuxtLoader = require("./nuxt");
 
 module.exports = {
   sqlConnection: undefined,
-  spoitfyApi: undefined,
+  spotifyAPI: undefined,
   async init({
     expressApp
   }) {
@@ -22,11 +22,11 @@ module.exports = {
     this.sqlConnection = await mysqlLoader();
     consola.success("MySqlDB Intialized");
 
-    this.spoitfyApi = await spotifyLoader(this.sqlConnection, expressApp);
+    this.spotifyAPI = await spotifyLoader(this.sqlConnection, expressApp);
     consola.success("Spotify API Intialized");
 
     // *** Debug
-    const playlist = new PlaylistService(this.spoitfyApi);
+    const playlist = new PlaylistService(this.spotifyAPI);
     consola.debug("ok", await playlist.searchTracks("Take on me").catch(e => { consola.error(e); }));
     // ***
   }
