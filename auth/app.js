@@ -13,9 +13,10 @@ var request = require('request'); // "Request" library
 var cors = require('cors');
 var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
+var mysql = require('mysql');
 
-var client_id = '597b99202e3347e1b2ee9b10cd85e65c'; // Your client id
-var client_secret = '927fd6a80b1848ca8c58ab54f0b62537'; // Your secret
+var client_id = '4650329e12bd42e1b9c4941699fb8feb'; // Your client id
+var client_secret = '6727b3707a32463ab112dc7abc8fbfc6o'; // Your secret
 var redirect_uri = 'http://localhost:8888/callback/'; // Your redirect uri
 
 /**
@@ -23,7 +24,7 @@ var redirect_uri = 'http://localhost:8888/callback/'; // Your redirect uri
  * @param  {number} length The length of the string
  * @return {string} The generated string
  */
-var generateRandomString = function(length) {
+var generateRandomString = function (length) {
   var text = '';
   var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -38,10 +39,39 @@ var stateKey = 'spotify_auth_state';
 var app = express();
 
 app.use(express.static(__dirname + '/public'))
-   .use(cors())
-   .use(cookieParser());
+  .use(cors())
+  .use(cookieParser());
 
-app.get('/login', function(req, res) {
+const connection = mysql.createConnection({
+  host: "cherob.eu",
+  user: "paju",
+  database: "paju",
+  password: "jrSjN2i7XkwTk2rT#E6q&Co7spdX"
+});
+
+connection.connect(err => {
+  if (err) {
+    throw err;
+  }
+  console.log("Connected!");
+});
+
+app.get('/', function (req) {
+  if (req.query.access_token) {
+    console.log(req.query.access_token);
+
+    const sql = "UPDATE `variables` SET `key` = '"+req.query.access_token+"' WHERE `variables`.`name` = `access_token`;";
+
+    sqlConnection.query(sql, (err, result) => {
+      if (err) {
+        throw err;
+      }
+      console.debug(`Result: ${JSON.stringify(result)}`);
+    });
+  }
+});
+
+app.get('/login', function (req, res) {
 
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
@@ -58,7 +88,7 @@ app.get('/login', function(req, res) {
     }));
 });
 
-app.get('/callback', function(req, res) {
+app.get('/callback', function (req, res) {
 
   // your application requests refresh and access tokens
   // after checking the state parameter
@@ -87,20 +117,22 @@ app.get('/callback', function(req, res) {
       json: true
     };
 
-    request.post(authOptions, function(error, response, body) {
+    request.post(authOptions, function (error, response, body) {
       if (!error && response.statusCode === 200) {
 
         var access_token = body.access_token,
-            refresh_token = body.refresh_token;
+          refresh_token = body.refresh_token;
 
         var options = {
           url: 'https://api.spotify.com/v1/me',
-          headers: { 'Authorization': 'Bearer ' + access_token },
+          headers: {
+            'Authorization': 'Bearer ' + access_token
+          },
           json: true
         };
 
         // use the access token to access the Spotify Web API
-        request.get(options, function(error, response, body) {
+        request.get(options, function (error, response, body) {
           console.log(body);
         });
 
@@ -120,13 +152,15 @@ app.get('/callback', function(req, res) {
   }
 });
 
-app.get('/refresh_token', function(req, res) {
+app.get('/refresh_token', function (req, res) {
 
   // requesting access token from refresh token
   var refresh_token = req.query.refresh_token;
   var authOptions = {
     url: 'https://accounts.spotify.com/api/token',
-    headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+    headers: {
+      'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+    },
     form: {
       grant_type: 'refresh_token',
       refresh_token: refresh_token
@@ -134,7 +168,7 @@ app.get('/refresh_token', function(req, res) {
     json: true
   };
 
-  request.post(authOptions, function(error, response, body) {
+  request.post(authOptions, function (error, response, body) {
     if (!error && response.statusCode === 200) {
       var access_token = body.access_token;
       res.send({
