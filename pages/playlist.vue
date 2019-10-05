@@ -4,7 +4,9 @@
       <v-list v-if="tracks.length !== 0" class="first-song" elevation="5">
         <v-list-item two-line ripple>
           <v-list-item-icon class="song--icon-wrapper">
-            <v-icon size="2rem">mdi-play</v-icon>
+            <v-icon size="2rem">
+              mdi-play
+            </v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>{{ tracks[0].title }}</v-list-item-title>
@@ -21,7 +23,9 @@
           </v-list-item-content>
           <v-btn text @click="remove(track.id)">
             <v-list-item-icon class="song--icon-wrapper">
-              <v-icon size="1.5rem">mdi-delete</v-icon>
+              <v-icon size="1.5rem">
+                mdi-delete
+              </v-icon>
             </v-list-item-icon>
           </v-btn>
         </v-list-item>
@@ -42,25 +46,25 @@
 </style>
 
 <script>
-export default {
-  data: () => ({
-    headers: [
-      { text: "Title", value: "name" },
-      { text: "Artist", value: "artist" },
-      { text: "Added by", value: "addedBy" }
-    ],
-    tracks: []
-  }),
-  async asyncData({ $axios }) {
-    return {
-      tracks: await $axios.$get("/playlist")
-    };
-  },
-  methods: {
-    remove(id) {
-      const index = this.tracks.findIndex(track => track.id === id);
-      this.$axios.$get("/playlist/delete?index="+index);
+  export default {
+    data: () => ({
+      headers: [
+        { text: "Title", value: "name" },
+        { text: "Artist", value: "artist" },
+        { text: "Added by", value: "addedBy" }
+      ],
+      tracks: []
+    }),
+    async asyncData({ $axios }) {
+      return {
+        tracks: await $axios.$get("/playlist")
+      };
+    },
+    methods: {
+      remove(id) {
+        const index = this.tracks.findIndex(track => track.id === id);
+        this.$axios.$get(`/playlist/delete?index=${index}`);
+      }
     }
-  }
-};
+  };
 </script>

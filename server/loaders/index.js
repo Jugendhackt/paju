@@ -1,4 +1,5 @@
 const consola = require("consola");
+const { Router } = require("express");
 
 // *** Debug
 // const QRCode = require("qrcode");

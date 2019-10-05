@@ -63,5 +63,5 @@ module.exports = context => {
     res.status(204).send();
   });
 
-  app.use("/playlist", R);
+  app.use("/api/playlist", R);
 };

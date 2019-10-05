@@ -3,7 +3,7 @@ const colors = require("vuetify/es5/util/colors").default;
 module.exports = {
   mode: "spa",
   env: {
-    SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID
+    PLAYLIST_ID: process.env.PLAYLIST_ID
   },
   /*
   ** Headers of the page
@@ -55,6 +55,7 @@ module.exports = {
   ** See https://axios.nuxtjs.org/options
   */
   axios: {
+    prefix: "/api/"
   },
   /*
   ** vuetify module configuration
