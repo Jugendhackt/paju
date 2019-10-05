@@ -15,7 +15,13 @@
         :items="tracks"
         :items-per-page="20"
         class="elevation-1"
-      ></v-data-table>
+      >
+        <template v-slot:item.add="{ item }">
+          <v-btn text @click="add(item.id)">
+            Add
+          </v-btn>
+        </template>
+      </v-data-table>
     </v-flex>
   </v-layout>
 </template>
@@ -30,6 +36,7 @@
   export default {
     data: () => ({
       headers: [
+        { text: "Add", value: "add" },
         { text: "Title", value: "title" },
         { text: "Artist", value: "artist" }
       ],
@@ -40,9 +47,18 @@
       search: debounce(async function() {
         this.tracks = (await this.$axios.$get(`/playlist/search?q=${encodeURIComponent(this.search)}`)).map(track => ({
           ...track,
-          artist: track.artists.join(" ")
-        }), 1000);
+          artist: track.artists.join(", ")
+        }), 500, {
+          trailing: true
+        });
       })
+    },
+    methods: {
+      add(id) {
+        this.$axios.$put("/playlist", {
+          id
+        });
+      }
     }
   };
 </script>

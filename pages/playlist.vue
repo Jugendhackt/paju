@@ -13,19 +13,19 @@
 </style>
 
 <script>
-export default {
-  data: () => ({
-    headers: [
-      { text: "Title", value: "name" },
-      { text: "Artist", value: "artists" },
-      { text: "Added by", value: "addedBy" }
-    ],
-    items: []
-  }),
-  async asyncData({ $axios }) {
-    return {
-      items: await $axios.$get("/tracklist")
-    };
-  }
-};
+  export default {
+    data: () => ({
+      headers: [
+        { text: "Title", value: "name" },
+        { text: "Artist", value: "artists" },
+        { text: "Added by", value: "addedBy" }
+      ],
+      items: []
+    }),
+    async asyncData({ $axios }) {
+      return {
+        items: await $axios.$get("/tracklist")
+      };
+    }
+  };
 </script>

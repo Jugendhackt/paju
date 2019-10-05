@@ -15,7 +15,10 @@ const SCOPE = [
   "user-read-currently-playing",
   "user-read-playback-state",
   "user-read-email",
-  "user-read-private"
+  "user-read-private",
+  "playlist-modify-private",
+  "playlist-modify-public",
+  "playlist-read-private"
 ].join(" ");
 
 const clientID = process.env.SPOTIFY_CLIENT_ID;

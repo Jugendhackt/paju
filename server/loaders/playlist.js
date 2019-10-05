@@ -34,5 +34,18 @@ module.exports = ({ db, app, spotifyApi }) => {
     })));
   });
 
+  R.put("/", async (req, res) => {
+    try {
+      await spotifyApi.addTracksToPlaylist(
+        process.env.PLAYLIST_ID,
+        [`spotify:track:${req.body.id}`]
+      );
+
+      res.status(204).send();
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
   app.use("/playlist", R);
 };
