@@ -30,27 +30,37 @@ module.exports = (spotifyApi, sqlConnection, app) => {
         throw err;
       }
 
-      const tracks = resSql.map(async track => {
-        const id = track.spotify_id.substring(14);
+      console.log("SONGS:", resSql.length);
+
+      for (let i = 0; i < resSql.length; i += 1) {
+        const track = {
+          name: "",
+          artists: "",
+          addedBy: ""
+        };
+        const id = resSql[i].spotify_id.substring(14);
+
         const trackInfo = await spotifyApi.getTrack(id).catch(err => {
           console.error(err);
         });
+
         track.name = trackInfo.body.name;
-        track.artists = "";
         trackInfo.body.artists.forEach(artist => {
           track.artists += `${artist.name} `;
         });
-        sqlConnection.query(`SELECT * FROM \`users\` WHERE \`adress\` = '${track.user_ip}'`, (err, res) => {
+        sqlConnection.query(`SELECT * FROM \`users\` WHERE \`adress\` = '${resSql[i].user_ip}'`, (err, resSec) => {
           if (err) {
             console.error(err);
           }
-          track.addedBy = res;
+          console.log(resSec);
+          track.addedBy = resSec[0].username;
         });
 
-        // console.log(track);
-      });
-      console.log(await Promise.all(tracks));
-      res.send(await Promise.all(tracks));
+        console.log(track);
+        resSql[i] = track;
+      }
+      console.log(resSql);
+      res.send(resSql);
     });
   });
 
