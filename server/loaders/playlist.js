@@ -4,8 +4,8 @@ const bodyParser = require("body-parser");
 const { Router } = require("express");
 const _ = require("lodash");
 
-module.exports = async context => {
-  const { db, app, spotifyApi } = context;
+module.exports = context => {
+  const { app, spotifyApi } = context;
 
   const R = new Router();
 

@@ -19,6 +19,11 @@
             <v-list-item-title>{{ track.title }}</v-list-item-title>
             <v-list-item-subtitle>{{ track.artists.join(", ") }}</v-list-item-subtitle>
           </v-list-item-content>
+          <v-btn text @click="remove(track.id)">
+            <v-list-item-icon class="song--icon-wrapper">
+              <v-icon size="1.5rem">mdi-delete</v-icon>
+            </v-list-item-icon>
+          </v-btn>
         </v-list-item>
       </v-list>
     </v-flex>
@@ -50,6 +55,12 @@ export default {
     return {
       tracks: await $axios.$get("/playlist")
     };
+  },
+  methods: {
+    remove(id) {
+      const index = this.tracks.findIndex(track => track.id === id);
+      this.$axios.$get("/playlist/delete?index="+index);
+    }
   }
 };
 </script>
