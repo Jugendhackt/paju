@@ -29,9 +29,7 @@ module.exports = (spotifyApi, sqlConnection, app) => {
       if (err) {
         throw err;
       }
-
-      console.log("SONGS:", resSql.length);
-
+      
       for (let i = 0; i < resSql.length; i += 1) {
         const track = {
           name: "",
@@ -52,14 +50,11 @@ module.exports = (spotifyApi, sqlConnection, app) => {
           if (err) {
             console.error(err);
           }
-          console.log(resSec);
           track.addedBy = resSec[0].username;
         });
 
-        console.log(track);
         resSql[i] = track;
       }
-      console.log(resSql);
       res.send(resSql);
     });
   });
