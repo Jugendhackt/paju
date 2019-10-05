@@ -2,6 +2,9 @@ const colors = require("vuetify/es5/util/colors").default;
 
 module.exports = {
   mode: "spa",
+  env: {
+    SPOTIFY_CLIENT_ID: "4650329e12bd42e1b9c4941699fb8feb"
+  },
   /*
   ** Headers of the page
   */
@@ -25,11 +28,13 @@ module.exports = {
   ** Global CSS
   */
   css: [
+    "material-design-icons-iconfont/dist/material-design-icons.css"
   ],
   /*
   ** Plugins to load before mounting the App
   */
   plugins: [
+
   ],
   /*
   ** Nuxt.js dev-modules
@@ -61,8 +66,8 @@ module.exports = {
       dark: true,
       themes: {
         dark: {
-          primary: colors.blue.darken2,
-          accent: colors.grey.darken3,
+          primary: "#1db954",
+          accent: colors.grey.darken4,
           secondary: colors.amber.darken3,
           info: colors.teal.lighten1,
           warning: colors.amber.base,
@@ -70,6 +75,9 @@ module.exports = {
           success: colors.green.accent3
         }
       }
+    },
+    icons: {
+      iconfont: "md"
     }
   },
   /*

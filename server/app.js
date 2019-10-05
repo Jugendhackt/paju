@@ -9,7 +9,7 @@ const {
 const config = require("../nuxt.config.js");
 
 // Import loaders
-const loaders = require("./loaders/index.js/index.js.js.js.js");
+const loaders = require("./loaders/index.js");
 
 config.dev = process.env.NODE_ENV !== "production";
 

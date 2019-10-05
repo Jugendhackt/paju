@@ -12,7 +12,9 @@ module.exports = async () => {
     if (err) {
         throw err;
     }
+
     console.log("Connected!");
   });
+
   return connection;
 };
