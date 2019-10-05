@@ -40,6 +40,8 @@
 </template>
 
 <script>
+  import debounce from "lodash.debounce";
+
   /* eslint-disable no-undef */
   window.onSpotifyWebPlaybackSDKReady = () => {
     // eslint-disable-next-line no-new

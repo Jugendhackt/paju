@@ -8,24 +8,27 @@ const consola = require("consola");
 // import Loaders
 const mysqlLoader = require("./mysql");
 const spotifyLoader = require("./spotify");
+const playerLoader = require("./player");
 const nuxtLoader = require("./nuxt");
 
+const context = {
+  db: null,
+  spotifyAPI: null,
+  spotifyAccessToken: null,
+  app: null
+};
+
 module.exports = {
-  sqlConnection: undefined,
-  spotifyApi: undefined,
-  async init({
-    expressApp
-  }) {
-    this.sqlConnection = await mysqlLoader();
+  async init(app) {
+    context.app = app;
+
+    await mysqlLoader(context);
     consola.success("MySqlDB initialized");
 
-    this.spotifyApi = await spotifyLoader(this.sqlConnection, expressApp);
+    await spotifyLoader(context);
     consola.success("Spotify Authorization initialized");
 
-    await nuxtLoader(expressApp);
-    consola.success("Nuxt initialized");
-
-    await nuxtLoader(expressApp);
+    await nuxtLoader(context);
     consola.success("Nuxt Initialized");
 
     // *** Debug

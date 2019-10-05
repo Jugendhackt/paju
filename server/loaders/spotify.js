@@ -21,7 +21,9 @@ const SCOPE = [
 const clientID = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
-module.exports = (sqlConnection, app) => {
+module.exports = context => {
+  const { db, app } = context;
+
   const spotifyApi = new SpotifyWebApi({
     client_id: clientID,
     client_secret: clientSecret,
@@ -31,11 +33,12 @@ module.exports = (sqlConnection, app) => {
   (() => {
     const sql = "SELECT * FROM `variables` WHERE `name` = 'access_token'";
 
-    sqlConnection.query(sql, (err, result) => {
+    db.query(sql, (err, result) => {
       if (err) {
         throw err;
       } else {
-        spotifyApi.setAccessToken(result[0].value);
+        context.spotifyAccessToken = result[0].value;
+        spotifyApi.setAccessToken(context.spotifyAccessToken);
       }
     });
   })();
@@ -96,12 +99,13 @@ module.exports = (sqlConnection, app) => {
           const sql =
             `UPDATE \`variables\` SET \`value\` = '${accessToken}' WHERE \`variables\`.\`name\` = 'access_token'`;
 
-          sqlConnection.query(sql, err => {
+          db.query(sql, err => {
             if (err) {
               throw err;
             }
           });
 
+          context.spotifyAccessToken = accessToken;
           spotifyApi.setAccessToken(accessToken);
 
           res.redirect("/dashboard");
@@ -115,7 +119,7 @@ module.exports = (sqlConnection, app) => {
   R.get("/token", (req, res) => {
     const sql = "SELECT * FROM `variables` WHERE `variables`.`name` = 'access_token'";
 
-    sqlConnection.query(sql, (err, result) => {
+    db.query(sql, (err, result) => {
       if (err) {
         throw err;
       }
@@ -127,5 +131,4 @@ module.exports = (sqlConnection, app) => {
   });
 
   app.use("/auth", R);
-  return spotifyApi;
 };
