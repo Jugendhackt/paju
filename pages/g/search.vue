@@ -9,17 +9,26 @@
         outlined
       ></v-text-field>
       <v-data-table
+        class="playlist-table elevation-1"
         disable-sort
         fixed-header
+        disable-pagination
+        hide-default-footer
+        :mobile-breakpoint="0"
         :headers="headers"
         :items="tracks"
-        :items-per-page="20"
-        class="elevation-1"
       >
         <template v-slot:item.add="{ item }">
-          <v-btn text @click="add(item.id)">
-            Add
-          </v-btn>
+          <template v-if="item.saved">
+            <v-btn icon text disabled>
+              <v-icon>check</v-icon>
+            </v-btn>
+          </template>
+          <template v-else>
+            <v-btn icon text @click="add(item)">
+              <v-icon>add_circle_outline</v-icon>
+            </v-btn>
+          </template>
         </template>
       </v-data-table>
     </v-flex>
@@ -27,7 +36,10 @@
 </template>
 
 <style scoped lang="scss">
-
+  .playlist-table {
+    width: 1000px;
+    max-width: 100%;
+  }
 </style>
 
 <script>
@@ -36,7 +48,7 @@
   export default {
     data: () => ({
       headers: [
-        { text: "Add", value: "add" },
+        { text: "", value: "add" },
         { text: "Title", value: "title" },
         { text: "Artist", value: "artist" }
       ],
@@ -54,9 +66,11 @@
       })
     },
     methods: {
-      add(id) {
+      add(item) {
+        item.saved = true;
+
         this.$axios.$put("/playlist", {
-          id
+          id: item.id
         });
       }
     }
