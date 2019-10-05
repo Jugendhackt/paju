@@ -17,13 +17,13 @@ module.exports = {
     expressApp
   }) {
     await nuxtLoader(expressApp);
-    consola.success("Nuxt Intialized");
+    consola.success("Nuxt Initialized");
 
     this.sqlConnection = await mysqlLoader();
-    consola.success("MySqlDB Intialized");
+    consola.success("MySqlDB Initialized");
 
     this.spotifyAPI = await spotifyLoader(this.sqlConnection, expressApp);
-    consola.success("Spotify API Intialized");
+    consola.success("Spotify API Initialized");
 
     // *** Debug
     const playlist = new PlaylistService(this.spotifyAPI);
