@@ -40,21 +40,45 @@
 </template>
 
 <script>
+  /* eslint-disable no-undef */
+  window.onSpotifyWebPlaybackSDKReady = () => {
+    // eslint-disable-next-line no-new
+    const player = new Spotify.Player({
+      name: "Paju",
+      getOAuthToken: async callback => {
+        // eslint-disable-next-line standard/no-callback-literal
+        callback((await $nuxt.$axios.$get("/auth/token")).token);
+      },
+      volume: 1
+    });
+
+    player.connect();
+  };
+
   export default {
     data: () => ({
       drawerOpen: null,
       items: [
         {
-          icon: "playlist_play",
-          title: "Playlist",
-          to: "/g/"
+          icon: "dashboard",
+          title: "Dashboard",
+          to: "/dashboard"
         },
         {
-          icon: "search",
-          title: "Search",
-          to: "/g/search"
+          icon: "playlist_play",
+          title: "Playlist",
+          to: "/playlist"
         }
       ]
-    })
+    }),
+    mounted() {
+      const script = document.createElement("script");
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      document.body.append(script);
+
+      this.$on("hook:beforeDestroy", () => {
+        document.body.removeChild(script);
+      });
+    }
   };
 </script>

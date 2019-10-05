@@ -15,17 +15,18 @@
 
 <script>
   export default {
+    layout: "admin",
     data: () => ({
       headers: [
         { text: "Title", value: "title" },
         { text: "Artist", value: "artist" },
         { text: "Added by", value: "addedBy" }
       ],
-      items: []
+      songs: []
     }),
     async asyncData({ $axios }) {
       return {
-        items: [
+        songs: [
           {
             id: "4Nip6oiJU24LqcUEi7u19S",
             title: "Standard (feat. Trettmann, Gringo, Ufo361 & Gzuz)",
@@ -36,7 +37,7 @@
       };
 
       // return {
-      //   items: await $axios.$get("/playlist")
+      //   songs: await $axios.$get("/playlist")
       // };
     }
   };
