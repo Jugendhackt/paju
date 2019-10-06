@@ -47,6 +47,7 @@
 
 <script>
   export default {
+    layout: "admin",
     data: () => ({
       headers: [
         { text: "Title", value: "name" },
