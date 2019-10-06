@@ -21,7 +21,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer/>
-          <v-btn href="/auth/redirect" color="primary">
+          <v-btn href="api/auth/redirect" color="primary">
             Login with Spotify
           </v-btn>
         </v-card-actions>

@@ -7,7 +7,7 @@ const nanoid = require("nanoid");
 const request = require("request"); // "Request" library
 const { Router } = require("express");
 
-const REDIRECT_URI = "http://localhost:3000/auth/callback";
+const REDIRECT_URI = "http://localhost:3000/api/auth/callback";
 const STATE_COOKIE_NAME = "spotify_auth_state";
 const SCOPE = [
   "streaming",
