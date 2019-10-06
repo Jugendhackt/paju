@@ -1,4 +1,5 @@
-# paju
+
+# paju 
 
 > Party Jukebox
 
@@ -20,3 +21,14 @@ $ yarn generate
 ```
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+
+## Todo
+- multiple Account handling
+- implement Vote System
+	- Score System
+	- Up/Down Vote
+- switch Streaming API
+- login for Admins
+- improve Design
+	- add track's cover
+	-  ...  
