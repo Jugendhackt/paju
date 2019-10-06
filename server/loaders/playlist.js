@@ -4,11 +4,6 @@ const _ = require("lodash");
 
 const COOLDOWN = 50000;
 
-const userList = [{
-  ip: "0.0.0.0",
-  time: 0
-}];
-
 module.exports = ({
   db,
   app,
@@ -73,6 +68,8 @@ module.exports = ({
         snapshotId
       );
 
+      saved.splice(saved.indexOf(req.params.id), 1);
+
       res.status(204).send();
     } catch (e) {
       console.error(e);
@@ -92,39 +89,31 @@ module.exports = ({
     })));
   });
 
+  const users = {};
+
   R.put("/", async (req, res) => {
     try {
-      const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+      const ip = req.connection.remoteAddress;
 
-        const susUsers = userList.find(user => (user.ip === ip)) || 0;
-        if (susUsers) {
-          const timeGone = Date.now() - susUsers.time;
-          console.log(timeGone);
-
-          if (timeGone < COOLDOWN) {
-            res.status(429).send({
-              error: "TIMEOUT",
-              timeLeft: COOLDOWN - timeGone
-            });
-
-            return;
-          }
-        }
-
-        userList.push({
-          ip,
-          time: Date.now()
+      if (Date.now() - users[ip] < COOLDOWN) {
+        res.status(429).send({
+          error: "TIMEOUT"
         });
 
-        console.log(userList);
+        return;
+      }
 
-        await spotifyApi.addTracksToPlaylist(
-          process.env.PLAYLIST_ID,
-          [`spotify:track:${req.body.id}`]
-        );
-        saved.push(req.body.id);
+      users[ip] = Date.now();
+      console.log(users);
 
-        res.status(204).send();
+      await spotifyApi.addTracksToPlaylist(
+        process.env.PLAYLIST_ID,
+        [`spotify:track:${req.body.id}`]
+      );
+
+      saved.push(req.body.id);
+
+      res.status(204).send();
     } catch (e) {
       console.error(e);
     }
