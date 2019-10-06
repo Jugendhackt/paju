@@ -26,7 +26,29 @@ module.exports = ({
     })).body.items.map(item => item.track.id);
   }, 10 * 1000);
 
+  let lastTrackID = null;
+
   R.get("/", async (req, res) => {
+    const currentPlayingTrack = (await spotifyApi.getMyCurrentPlayingTrack({
+      fields: "item(id)"
+    })).body.item;
+
+    if (currentPlayingTrack) {
+      if (currentPlayingTrack.id !== lastTrackID) {
+        const snapshotId = (await spotifyApi.getPlaylist(process.env.PLAYLIST_ID, {
+          fields: "snapshot_id"
+        })).body.snapshot_id;
+
+        await spotifyApi.removeTracksFromPlaylistByPosition(
+          process.env.PLAYLIST_ID,
+          [0],
+          snapshotId
+        );
+      }
+
+      lastTrackID = currentPlayingTrack.id;
+    }
+
     const playlist = await spotifyApi.getPlaylistTracks(process.env.PLAYLIST_ID, {
       limit: 100,
       fields: "items(track(name,id,artists(name)))"
@@ -39,19 +61,21 @@ module.exports = ({
     })));
   });
 
-  R.get("/delete", async (req, res) => {
+  R.delete("/:id", async (req, res) => {
     try {
-      await spotifyApi.removeTracksFromPlaylistByPosition(
+      const snapshotId = (await spotifyApi.getPlaylist(process.env.PLAYLIST_ID, {
+        fields: "snapshot_id"
+      })).body.snapshot_id;
+
+      await spotifyApi.removeTracksFromPlaylist(
         process.env.PLAYLIST_ID,
-        [req.query.index]
+        [{ uri: `spotify:track:${req.params.id}` }],
+        snapshotId
       );
 
       res.status(204).send();
-      res.send("ok");
     } catch (e) {
-      res.status(e.statusCode).send();
       console.error(e);
-      res.send(e);
     }
   });
 

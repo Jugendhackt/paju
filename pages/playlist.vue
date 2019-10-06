@@ -16,18 +16,18 @@
       </v-list>
 
       <v-list v-if="tracks.length > 1" elevation="2">
-        <v-list-item v-for="track in tracks.slice(1)" :key="track.id" two-line ripple>
+        <v-list-item v-for="(track, index) in tracks.slice(1)" :key="track.id" two-line ripple>
           <v-list-item-content>
             <v-list-item-title>{{ track.title }}</v-list-item-title>
             <v-list-item-subtitle>{{ track.artists.join(", ") }}</v-list-item-subtitle>
           </v-list-item-content>
-          <v-btn text @click="remove(track.id)">
-            <v-list-item-icon class="song--icon-wrapper">
+          <v-list-item-action>
+            <v-btn icon @click="remove(index)">
               <v-icon size="1.5rem">
-                mdi-delete
+                delete
               </v-icon>
-            </v-list-item-icon>
-          </v-btn>
+            </v-btn>
+          </v-list-item-action>
         </v-list-item>
       </v-list>
     </v-flex>
@@ -62,9 +62,10 @@
       };
     },
     methods: {
-      remove(id) {
-        const index = this.tracks.findIndex(track => track.id === id);
-        this.$axios.$get(`/playlist/delete?index=${index}`);
+      remove(index) {
+        const track = this.tracks[index + 1];
+        this.$axios.$delete(`/playlist/${track.id}`);
+        this.tracks.splice(index + 1, 1);
       }
     }
   };
